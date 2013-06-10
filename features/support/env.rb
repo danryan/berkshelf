@@ -33,13 +33,13 @@ Spork.prefork do
     set_env 'RUBY_ENV', 'test'
     clean_cookbook_store
     generate_berks_config(File.join(ENV['BERKSHELF_PATH'], 'config.json'))
-    @aruba_io_wait_seconds = 5
-    @aruba_timeout_seconds = 30
+    @aruba_io_wait_seconds = RUBY_PLATFORM == 'java' ? 15 : 5
+    @aruba_timeout_seconds = RUBY_PLATFORM == 'java' ? 90 : 30
   end
 
   Before('@slow_process') do
-    @aruba_timeout_seconds = 60
-    @aruba_io_wait_seconds = 30
+    @aruba_io_wait_seconds = RUBY_PLATFORM == 'java' ? 90 : 30
+    @aruba_timeout_seconds = RUBY_PLATFORM == 'java' ? 180 : 60
   end
 
   # Chef Zero
