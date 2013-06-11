@@ -263,7 +263,7 @@ module Berkshelf
     # @raise [DuplicateSourceDefined] if a source is added whose name conflicts
     #   with a source who has already been added.
     #
-    # @return [Array<Berkshelf::CookbookSource]
+    # @return [Array<Berkshelf::Dependency]
     def add_source(name, constraint = nil, options = {})
       if has_source?(name)
         # Only raise an exception if the source is a true duplicate
@@ -276,13 +276,13 @@ module Berkshelf
 
       options[:constraint] = constraint
 
-      @sources[name] = CookbookSource.new(self, name, options)
+      @sources[name] = Berkshelf::Dependency.new(self, name, options)
     end
 
     # @param [#to_s] source
     #   the source to remove
     #
-    # @return [Berkshelf::CookbookSource]
+    # @return [Berkshelf::Dependency]
     def remove_source(source)
       @sources.delete(source.to_s)
     end
@@ -312,7 +312,7 @@ module Berkshelf
     # @raise [Berkshelf::ArgumentError]
     #   if a value for both :except and :only is provided
     #
-    # @return [Array<Berkshelf::CookbookSource>]
+    # @return [Array<Berkshelf::Dependency>]
     #   the list of cookbook sources that match the given options
     def sources(options = {})
       l_sources = @sources.values
@@ -342,24 +342,24 @@ module Berkshelf
     #
     # @param [String] name
     #   the name of the cookbook source to search for
-    # @return [Berkshelf::CookbookSource, nil]
+    # @return [Berkshelf::Dependency, nil]
     #   the cookbook source, or nil if one does not exist
     def find(name)
       @sources[name]
     end
 
     # @return [Hash]
-    #   a hash containing group names as keys and an array of CookbookSources
+    #   a hash containing group names as keys and an array of Berkshelf::Dependencys
     #   that are a member of that group as values
     #
     #   Example:
     #     {
     #       nautilus: [
-    #         #<Berkshelf::CookbookSource: nginx (~> 1.0.0)>,
-    #         #<Berkshelf::CookbookSource: mysql (~> 1.2.4)>
+    #         #<Berkshelf::Dependency: nginx (~> 1.0.0)>,
+    #         #<Berkshelf::Dependency: mysql (~> 1.2.4)>
     #       ],
     #       skarner: [
-    #         #<Berkshelf::CookbookSource: nginx (~> 1.0.0)>
+    #         #<Berkshelf::Dependency: nginx (~> 1.0.0)>
     #       ]
     #     }
     def groups
@@ -376,7 +376,7 @@ module Berkshelf
     # @param [String] name
     #   name of the source to return
     #
-    # @return [Berkshelf::CookbookSource]
+    # @return [Berkshelf::Dependency]
     def [](name)
       @sources[name]
     end
@@ -400,7 +400,7 @@ module Berkshelf
     #      either a version constraint has changed, or a new source has been
     #      added to the Berksfile. In the event that a locked_source exists,
     #      but it no longer satisfies the constraint, this method will raise
-    #      a {Berkshelf::OutdatedCookbookSource}, and inform the user to run
+    #      a {Berkshelf::OutdatedDependency}, and inform the user to run
     #      <tt>berks update COOKBOOK</tt> to remedy the issue.
     #    - Remove any locked sources that no longer exist in the Berksfile
     #      (i.e. a cookbook source was removed from the Berksfile).
@@ -419,7 +419,7 @@ module Berkshelf
     #   a path to "vendor" the cached_cookbooks resolved by the resolver. Vendoring
     #   is a technique for packaging all cookbooks resolved by a Berksfile.
     #
-    # @raise [Berkshelf::OutdatedCookbookSource]
+    # @raise [Berkshelf::OutdatedDependency]
     #   if the lockfile constraints do not satisfy the Berskfile constraints
     # @raise [Berkshelf::ArgumentError]
     #   if there are missing or conflicting options
@@ -669,7 +669,7 @@ module Berkshelf
 
     # Finds a solution for the Berksfile and returns an array of CachedCookbooks.
     #
-    # @param [Array<Berkshelf::CookbookSource>] sources
+    # @param [Array<Berkshelf::Dependency>] sources
     #   Array of cookbook sources to resolve
     #
     # @option options [Boolean] :skip_dependencies
@@ -744,7 +744,7 @@ module Berkshelf
 
       # The list of sources "locked" by the lockfile.
       #
-      # @return [Array<Berkshelf::CookbookSource>]
+      # @return [Array<Berkshelf::Dependency>]
       #   the list of sources in this lockfile
       def locked_sources
         lockfile.sources
@@ -757,7 +757,7 @@ module Berkshelf
       # because we should just use the locked version.
       #
       # If a locked source exists, but doesn't satisfy the constraint, raise a
-      # {Berkshelf::OutdatedCookbookSource} and tell the user to run update.
+      # {Berkshelf::OutdatedDependency} and tell the user to run update.
       def apply_lockfile(sources = [])
         sources.collect do |source|
           source_from_lockfile(source) || source
@@ -773,7 +773,7 @@ module Berkshelf
         # by the constraint
         if locked_source.locked_version
           unless source.version_constraint.satisfies?(locked_source.locked_version)
-            raise Berkshelf::OutdatedCookbookSource.new(locked_source, source)
+            raise Berkshelf::OutdatedDependency.new(locked_source, source)
           end
         end
 

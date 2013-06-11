@@ -1,8 +1,8 @@
+require_relative 'dependency'
+require_relative 'location'
+
 module Berkshelf
   class Downloader
-    require_relative 'cookbook_source'
-    require_relative 'location'
-
     extend Forwardable
 
     DEFAULT_LOCATIONS = [
@@ -60,9 +60,9 @@ module Berkshelf
       @locations.select { |loc| loc[:type] == type && loc[:value] == value }.any?
     end
 
-    # Downloads the given CookbookSource.
+    # Downloads the given Berkshelf::Dependency.
     #
-    # @param [CookbookSource] source
+    # @param [Berkshelf::Dependency] source
     #   the source to download
     #
     # @return [Array]
@@ -88,11 +88,11 @@ module Berkshelf
 
     private
 
-      # Searches locations for a CookbookSource. If the source does not contain a
-      # value for {CookbookSource#location}, the default locations of this
+      # Searches locations for a Berkshelf::Dependency. If the source does not contain a
+      # value for {Berkshelf::Dependency#location}, the default locations of this
       # downloader will be used to attempt to retrieve the source.
       #
-      # @param [CookbookSource] source
+      # @param [Berkshelf::Dependency] source
       #   the source to download
       #
       # @return [Array]
@@ -125,13 +125,13 @@ module Berkshelf
       end
 
 
-      # Validates that a source is an instance of CookbookSource
+      # Validates that a source is an instance of Berkshelf::Dependency
       #
-      # @param [CookbookSource] source
+      # @param [Berkshelf::Dependency] source
       #
       # @return [Boolean]
       def validate_source(source)
-        source.is_a?(Berkshelf::CookbookSource)
+        source.is_a?(Berkshelf::Dependency)
       end
   end
 end
