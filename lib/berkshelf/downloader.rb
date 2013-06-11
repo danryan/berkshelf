@@ -14,7 +14,7 @@ module Berkshelf
     ]
 
     # @return [String]
-    #   a filepath to download cookbook sources to
+    #   a filepath to download dependencies to
     attr_reader :cookbook_store
 
     def_delegators :@cookbook_store, :storage_path
@@ -27,7 +27,7 @@ module Berkshelf
 
     # @return [Array<Hash>]
     #   an Array of Hashes representing each default location that can be used to attempt
-    #   to download cookbook sources which do not have an explicit location. An array of default locations will
+    #   to download dependencies which do not have an explicit location. An array of default locations will
     #   be used if no locations are explicitly added by the {#add_location} function.
     def locations
       @locations.any? ? @locations : DEFAULT_LOCATIONS
@@ -62,50 +62,50 @@ module Berkshelf
 
     # Downloads the given Berkshelf::Dependency.
     #
-    # @param [Berkshelf::Dependency] source
-    #   the source to download
+    # @param [Berkshelf::Dependency] dependency
+    #   the dependency to download
     #
     # @return [Array]
     #   an array containing the downloaded CachedCookbook and the Location used
     #   to download the cookbook
-    def download(source)
-      cached_cookbook, location = if source.location
+    def download(dependency)
+      cached_cookbook, location = if dependency.location
         begin
-          [source.location.download(storage_path), source.location]
+          [dependency.location.download(storage_path), dependency.location]
         rescue CookbookValidationFailure; raise
         rescue
-          Berkshelf.formatter.error "Failed to download '#{source.name}' from #{source.location}"
+          Berkshelf.formatter.error "Failed to download '#{dependency.name}' from #{dependency.location}"
           raise
         end
       else
-        search_locations(source)
+        search_locations(dependency)
       end
 
-      source.cached_cookbook = cached_cookbook
+      dependency.cached_cookbook = cached_cookbook
 
       [cached_cookbook, location]
     end
 
     private
 
-      # Searches locations for a Berkshelf::Dependency. If the source does not contain a
+      # Searches locations for a Berkshelf::Dependency. If the dependency does not contain a
       # value for {Berkshelf::Dependency#location}, the default locations of this
-      # downloader will be used to attempt to retrieve the source.
+      # downloader will be used to attempt to retrieve the dependency.
       #
-      # @param [Berkshelf::Dependency] source
-      #   the source to download
+      # @param [Berkshelf::Dependency] dependency
+      #   the dependency to download
       #
       # @return [Array]
       #   an array containing the downloaded CachedCookbook and the Location used
       #   to download the cookbook
-      def search_locations(source)
+      def search_locations(dependency)
         cached_cookbook = nil
         location = nil
 
         locations.each do |loc|
           location = Location.init(
-            source.name,
-            source.version_constraint,
+            dependency.name,
+            dependency.version_constraint,
             loc[:options].merge(loc[:type] => loc[:value])
           )
           begin
@@ -118,20 +118,20 @@ module Berkshelf
         end
 
         if cached_cookbook.nil?
-          raise CookbookNotFound, "Cookbook '#{source.name}' not found in any of the default locations"
+          raise CookbookNotFound, "Cookbook '#{dependency.name}' not found in any of the default locations"
         end
 
         [ cached_cookbook, location ]
       end
 
 
-      # Validates that a source is an instance of Berkshelf::Dependency
+      # Validates that a dependency is an instance of Berkshelf::Dependency
       #
-      # @param [Berkshelf::Dependency] source
+      # @param [Berkshelf::Dependency] dependency
       #
       # @return [Boolean]
-      def validate_source(source)
-        source.is_a?(Berkshelf::Dependency)
+      def validate_dependency(dependency)
+        dependency.is_a?(Berkshelf::Dependency)
       end
   end
 end
