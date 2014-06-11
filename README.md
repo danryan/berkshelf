@@ -1,5 +1,10 @@
-Berkshelf
-=========
+Berkshelf Mini
+==============
+
+A Berkshelf that won't make you flip tables.
+------------------------------------------
+
+
 [![Gem Version](https://badge.fury.io/rb/berkshelf.png)](http://badge.fury.io/rb/berkshelf)
 [![Build Status](https://travis-ci.org/RiotGames/berkshelf.png?branch=master)](https://travis-ci.org/RiotGames/berkshelf)
 [![Dependency Status](https://gemnasium.com/RiotGames/berkshelf.png)](https://gemnasium.com/RiotGames/berkshelf)
